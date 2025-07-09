@@ -1,0 +1,166 @@
+# Data Processing Framework Configuration
+# Main configuration file for multi-tool data collection and processing
+
+# Application Configuration
+app:
+  name: "Data Processing Framework"
+  version: "1.0.0"
+  environment: "development"
+  debug: false
+  host: "0.0.0.0"
+  port: 8000
+  log_level: "INFO"
+
+# Database Configuration
+database:
+  host: "localhost"
+  port: 5432
+  database: "data_processing"
+  username: "postgres"
+  password: "password"
+  ssl_mode: "prefer"
+  pool_size: 5
+  max_overflow: 10
+
+# Redis Configuration
+redis:
+  host: "localhost"
+  port: 6379
+  password: null
+  database: 0
+  ssl: false
+
+# Tool Configurations
+tools:
+  cequence:
+    name: "cequence"
+    api_base_url: "https://api.cequence.ai"
+    auth_type: "api_key"
+    rate_limit: 100
+    timeout: 30
+    retry_attempts: 3
+    retry_delay: 1.0
+    credentials:
+      api_key: "${CEQUENCE_API_KEY}"
+      # Additional credentials loaded from environment variables
+      
+  42crunch:
+    name: "42crunch"
+    api_base_url: "https://api.42crunch.com"
+    auth_type: "oauth"
+    rate_limit: 50
+    timeout: 30
+    retry_attempts: 3
+    retry_delay: 1.0
+    credentials:
+      client_id: "${FORTYTWCRUNCH_CLIENT_ID}"
+      client_secret: "${FORTYTWCRUNCH_CLIENT_SECRET}"
+      # OAuth credentials loaded from environment variables
+      
+  apigee:
+    name: "apigee"
+    api_base_url: "https://apigee.googleapis.com"
+    auth_type: "service_account"
+    rate_limit: 200
+    timeout: 30
+    retry_attempts: 3
+    retry_delay: 1.0
+    credentials:
+      service_account_key: "${APIGEE_SERVICE_ACCOUNT_KEY}"
+      project_id: "${APIGEE_PROJECT_ID}"
+      # Service account credentials loaded from environment variables
+
+# Schedule Configurations
+schedules:
+  daily_collection:
+    cron_expression: "0 2 * * *"  # Daily at 2 AM
+    tools:
+      - "cequence"
+      - "42crunch"
+      - "apigee"
+    job_type: "collection"
+    enabled: true
+    max_runtime: 3600  # 1 hour
+    description: "Daily data collection from all tools"
+    
+  weekly_processing:
+    cron_expression: "0 4 * * 0"  # Weekly on Sunday at 4 AM
+    tools:
+      - "cequence"
+      - "42crunch"
+      - "apigee"
+    job_type: "processing"
+    enabled: true
+    max_runtime: 7200  # 2 hours
+    description: "Weekly data processing and enrichment"
+    
+  monthly_report:
+    cron_expression: "0 6 1 * *"  # Monthly on 1st at 6 AM
+    tools:
+      - "cequence"
+      - "42crunch"
+      - "apigee"
+    job_type: "report"
+    enabled: true
+    max_runtime: 1800  # 30 minutes
+    description: "Monthly summary report generation"
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "structured"
+  outputs:
+    - "console"
+    - "file"
+  file_path: "logs/data_processing.log"
+  max_file_size: "10MB"
+  backup_count: 5
+  rotation: "daily"
+
+# Storage Configuration
+storage:
+  raw_data_path: "storage/raw_data"
+  processed_data_path: "storage/processed_data"
+  reports_path: "storage/reports"
+  backup_path: "storage/backups"
+  retention_days: 90
+  compression: true
+
+# Processing Configuration
+processing:
+  max_concurrent_jobs: 2
+  job_timeout: 3600
+  retry_attempts: 3
+  retry_delay: 60.0
+  batch_size: 1000
+  
+# Collection Configuration
+collection:
+  max_concurrent_jobs: 2
+  job_timeout: 3600
+  retry_attempts: 3
+  retry_delay: 60.0
+  rate_limit_buffer: 0.1  # 10% buffer for rate limits
+
+# Monitoring Configuration
+monitoring:
+  health_check_interval: 30
+  performance_metrics: true
+  error_alerting: true
+  log_aggregation: true
+  
+# Security Configuration
+security:
+  encryption_key: "${ENCRYPTION_KEY}"
+  jwt_secret: "${JWT_SECRET}"
+  api_key_header: "X-API-Key"
+  rate_limiting: true
+  
+# Feature Flags
+features:
+  excel_processing: true
+  async_processing: true
+  background_tasks: true
+  api_caching: true
+  data_validation: true
+  performance_monitoring: true 
